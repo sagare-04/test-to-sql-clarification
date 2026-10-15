@@ -1,6 +1,6 @@
 
 from database import execute_select
-
+from clarification import check_clarification
 
 def generate_sql(question):
     """Convert supported English questions into SQL."""
@@ -40,9 +40,25 @@ def generate_sql(question):
     return None, None
 
 
-def main():
-    question = input("Ask a question about your customers: ")
 
+def main():
+    question = input("Ask a question about your customers: ").strip()
+
+    # Step 1: Check whether clarification is needed.
+    clarification = check_clarification(question)
+
+    if clarification:
+        print(f"\nClarification: {clarification}")
+        answer = input("Your answer: ").strip()
+
+        if not answer:
+            print("No answer provided. Please try again.")
+            return
+
+        # Build a complete question from the original request and answer.
+        question = f"Show customers in {answer}"
+
+    # Step 2: Generate SQL from the complete question.
     query, params = generate_sql(question)
 
     if query is None:
@@ -50,10 +66,12 @@ def main():
         print("Please try asking about all customers or a city.")
         return
 
+    # Step 3: Execute SQL and display the results.
     try:
         columns, rows = execute_select(query, params)
 
         print("\nResults:")
+
         if not rows:
             print("No records found.")
             return
