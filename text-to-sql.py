@@ -1,6 +1,7 @@
 
 from database import execute_select
 from clarification import check_clarification
+from validator import validate_sql
 
 def generate_sql(question):
     """Convert supported English questions into SQL."""
@@ -66,7 +67,17 @@ def main():
         print("Please try asking about all customers or a city.")
         return
 
-    # Step 3: Execute SQL and display the results.
+    
+    # Validate SQL before sending it to MySQL.
+    is_valid, message = validate_sql(query)
+
+    if not is_valid:
+        print(f"SQL rejected: {message}")
+        return
+
+    print(f"SQL validation: {message}")
+
+    # Execute only after validation succeeds.
     try:
         columns, rows = execute_select(query, params)
 
@@ -85,6 +96,12 @@ def main():
     except Exception as error:
         print(f"Something went wrong: {error}")
 
+        
+    except Exception as error:
+        print(f"Something went wrong: {error}")
+
 
 if __name__ == "__main__":
     main()
+        
+   
